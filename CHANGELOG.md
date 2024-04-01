@@ -1,5 +1,10 @@
 # Changelog for package websocket
 
+tros_2.1.0 (2024-04-01)
+------------------
+1. 适配ros2 humble零拷贝。
+2. 新增中英双语README。
+
 tros_2.0.1 (2024-3-4)
 ------------------
 1. 订阅的`jpeg`压缩格式图片使用的数据类型由`sensor_msgs::msg::Image`变更为`sensor_msgs::msg::CompressedImage`。

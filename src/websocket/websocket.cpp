@@ -114,7 +114,7 @@ Websocket::Websocket(rclcpp::Node::SharedPtr &nh) : nh_(nh) {
     image_hbmem_sub_ =
         nh_->create_subscription<hbm_img_msgs::msg::HbmMsg1080P>(
             image_topic_name_,
-            10,
+            rclcpp::SensorDataQoS(),
             std::bind(
                 &Websocket::OnGetJpegImageHbmem, this, std::placeholders::_1));
   } else {

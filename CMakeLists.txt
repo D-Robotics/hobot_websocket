@@ -52,7 +52,7 @@ if (${CMAKE_SYSTEM_PROCESSOR} STREQUAL "aarch64")
   include_directories(
     third_party/aarch64/protobuf/include
     third_party/aarch64/uWebSockets/include
-    third_party/aarch64/openssl/include
+    ${CMAKE_SYSROOT}/usr/include/
     /usr/include/vio
     ${CMAKE_SYSROOT}/usr/include/vio
   )
@@ -60,7 +60,7 @@ if (${CMAKE_SYSTEM_PROCESSOR} STREQUAL "aarch64")
   link_directories(
     third_party/aarch64/protobuf/lib
     third_party/aarch64/uWebSockets/lib
-    third_party/aarch64/openssl/lib
+    ${CMAKE_SYSROOT}/usr/lib/aarch64-linux-gnu/
     /usr/lib/hbmedia
     ${CMAKE_SYSROOT}/usr/lib/hbmedia
   )

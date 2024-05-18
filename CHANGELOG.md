@@ -1,5 +1,9 @@
 # Changelog for package websocket
 
+tros_2.2.0 (2024-04-29)
+------------------
+1. openssl的加密库不指定连接1.1.0版本，连接系统对应的sysroot安装的版本。
+
 tros_2.1.0 (2024-04-01)
 ------------------
 1. 适配ros2 humble零拷贝。

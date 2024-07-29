@@ -2,9 +2,9 @@
  * @Description: implement of x2base.proto
  * @Author: ruoting.ding@horizonl.ai
  * @Date: 2019-09-23 17:05:35
- * @LastEditors: hao.tian@horizon.ai
+ * @LastEditors: hao.tian@d-robotics.cc
  * @LastEditTime: 2019-09-23 17:05:35
- * @Copyright 2017~2019 Horizon Robotics, Inc.
+ * @Copyright 2017~2019 D-Robotics, Inc.
  */
 syntax = "proto3";
 package x3;

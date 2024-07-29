@@ -4,7 +4,7 @@
   <name>websocket</name>
   <version>2.2.0</version>
   <description>TogetheROS websocket</description>
-  <maintainer email="zhuo.wang@horizon.ai">zhuo</maintainer>
+  <maintainer email="zhuo.wang@d-robotics.cc">zhuo</maintainer>
   <license>Apache License 2.0</license>
 
   <buildtool_depend>ament_cmake</buildtool_depend>

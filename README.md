@@ -99,7 +99,7 @@ Specific package dependencies include:
 
 ### Running
 
-After successful compilation, if it is Docker cross compilation, the generated install path needs to be copied to Horizon X3 development board, other methods do not require this. The running steps are as follows:
+After successful compilation, if it is Docker cross compilation, the generated install path needs to be copied to RDK X3 development board, other methods do not require this. The running steps are as follows:
 
 #### **x86 Ubuntu system**
 

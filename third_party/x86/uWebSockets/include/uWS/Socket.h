@@ -1,8 +1,8 @@
 /**
- * Copyright (c) 2019, Horizon Robotics, Inc.
+ * Copyright (c) 2019, D-Robotics, Inc.
  * All rights reserved.
  * @Author: xudong.du
- * @Mail: xudong.du@horizon.ai
+ * @Mail: xudong.du@d-robotics.cc
  * @Date: 2020-09-14 15:38:52
  * @Version: v0.0.1
  */

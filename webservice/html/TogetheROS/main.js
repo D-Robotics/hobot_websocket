@@ -8,6 +8,25 @@ let messageShowSelect = {};
 let socketParameters = getURLParameter();
 let pathNum = getVideoNum();
 let pathNumArr  = [...new Array(pathNum).keys()];
+let bgr_putpalette = [
+  128, 64 , 128, 244, 35 , 232, 70 , 70 , 70 , 102, 102, 156, 190, 153, 153, 
+  153, 153, 153, 250, 170, 30 , 220, 220, 0  , 107, 142, 35 , 152, 251, 152, 
+  0  , 130, 180, 220, 20 , 60 , 255, 0  , 0  , 0  , 0  , 142, 0  , 0  , 70 , 
+  0  , 60 , 100, 0  , 80 , 100, 0  , 0  , 230, 119, 11 , 32 , 216, 191, 69 , 
+  50 , 33 , 199, 108, 59 , 247, 249, 96 , 97 , 97 , 234, 195, 239, 202, 156, 
+  81 , 177, 90 , 180, 100, 245, 251, 146, 184, 245, 26 , 209, 56 , 20 , 144, 
+  210, 56 , 241, 19 , 75 , 171, 144, 17 , 198, 216, 105, 125, 108, 212, 181, 
+  75 , 189, 225, 137, 152, 226, 210, 107, 81 , 130, 189, 63 , 4  , 31 , 139, 
+  106, 202, 255, 184, 64 , 56 , 200, 69 , 31 , 62 , 129, 13 , 19 , 235, 0  , 
+  255, 129, 8  , 238, 24 , 80 , 176, 115, 54 , 232, 100, 164, 13 , 192, 234, 
+  48 , 140, 176, 178, 145, 83 , 115, 225, 250, 18 , 6  , 98 , 34 , 156, 78 , 
+  74 , 120, 22 , 185, 5  , 159, 111, 133, 243, 170, 252, 118, 23 , 29 , 143, 
+  237, 6  , 163, 104, 231, 87 , 18 , 15 , 185, 45 , 152, 178, 147, 116, 56 , 
+  28 , 197, 148, 134, 46 , 205, 243, 200, 47 , 5  , 233, 70 , 224, 88 , 0  , 
+  237, 82 , 6  , 180, 104, 75 , 80 , 91 , 20 , 95 , 225, 61 , 91 , 37 , 187, 
+  129, 183, 114, 246, 21 , 181, 26 , 90 , 201, 218, 8  , 81 , 97 , 14 , 208, 
+  51 , 172, 247,
+];
 
 createVideo();
 changeCheckboxShow();
@@ -273,8 +292,6 @@ function transformData(buffer) {
             points: [],
             segmentation: [],
           }
-          let labelStart = 0;
-          let labelCount = 20;
           let labelBodyBox = null;
           let k = 0;
 
@@ -346,9 +363,6 @@ function transformData(buffer) {
           // 属性
           if (item['attributes_'] && item['attributes_'].length) {
             item['attributes_'].map(val => {
-              // 分割的颜色参数
-              labelStart = val['type_'] === "segmentation_label_start" ? val['value_'] : 0
-              labelCount = val['type_'] === "segmentation_label_count" ? val['value_'] : 20
               // 分割的系数
               k = val['type_'] === 'expansion_ratio' && val['value_'] ?  val['value_'] : 0
               // 摔倒
@@ -396,30 +410,21 @@ function transformData(buffer) {
           if ( item['floatMatrixs_'] && item['floatMatrixs_'].length ) {
             let floatType = item['floatMatrixs_'][0]['type_']
             if (floatType === 'segmentation' && messageShowSelect.floatMatrixs) {
-              let color = [];
-              let step = 255 * 3 / labelCount;
-              for (let i = 0; i < labelCount; ++i) {
-                let R = (labelStart / 3 * 3) % 256;
-                let G = (labelStart / 3 * 2) % 256;
-                let B = (labelStart / 3) % 256;
-                color.push([R, G, B]);
-                labelStart += step;
-              }
-              if (color.length) {
-                let floatdata = []
-                item['floatMatrixs_'][0]['arrays_'].map(values => {
-                  values['value_'].map(index => {
-                    let colors = color[Math.trunc(index)]
-                    floatdata.push(colors[0], colors[1], colors[2], 155)
-                  })
+              let floatdata = []
+              item['floatMatrixs_'][0]['arrays_'].map(values => {
+                values['value_'].map(index => {
+                  floatdata.push(bgr_putpalette[(index % 81) * 3], 
+                                 bgr_putpalette[(index % 81) * 3 + 1], 
+                                 bgr_putpalette[(index % 81) * 3 + 2], 
+                                 155)
                 })
-                obj.segmentation.push({
-                  type: 'full_img',
-                  w: item['floatMatrixs_'][0]['arrays_'][0]['value_'].length,
-                  h: item['floatMatrixs_'][0]['arrays_'].length,
-                  data: floatdata
-                })
-              }
+              })
+              obj.segmentation.push({
+                type: 'full_img',
+                w: item['floatMatrixs_'][0]['arrays_'][0]['value_'].length,
+                h: item['floatMatrixs_'][0]['arrays_'].length,
+                data: floatdata
+              })
             } else { // 抠图分割
               if (messageShowSelect.floatMatrixsMatting && labelBodyBox && FullFloatMatrix) {
                 let labelWidth = labelBodyBox.box2.x - labelBodyBox.box1.x;

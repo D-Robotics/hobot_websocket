@@ -93,7 +93,7 @@ function createVideo() {
       <div class="${names}" id="video-wrap-${port}" style="width: ${w}%; height: ${h}%;">
         <div class="cont">
           <div class="cam" id="cam">
-            <img class="logo2" src="../assets/images/aionhorizon.png" alt="">
+            <img class="logo2" src="../assets/images/logo.png" alt="">
             <img src="" class="layer" id="video-${port}" alt="">
             <canvas class="canvas" id="canvas-${port}-1"></canvas>
             <canvas class="canvas" id="canvas-${port}-2"></canvas>

@@ -82,14 +82,14 @@ Websocket::Websocket(rclcpp::Node::SharedPtr &nh) : nh_(nh) {
   nh_->get_parameter<int>("output_fps", output_fps_);
 
   if (only_show_image_) {
-    RCLCPP_INFO_STREAM(nh_->get_logger(),
+    RCLCPP_WARN_STREAM(nh_->get_logger(),
                        "\nParameter:"
                            << "\n image_topic: " << image_topic_name_
                            << "\n image_type: " << image_type_
                            << "\n only_show_image: " << only_show_image_
                            << "\n output_fps: " << output_fps_);
   } else {
-    RCLCPP_INFO_STREAM(nh_->get_logger(),
+    RCLCPP_WARN_STREAM(nh_->get_logger(),
                        "\nParameter:"
                            << "\n image_topic: " << image_topic_name_
                            << "\n image_type: " << image_type_

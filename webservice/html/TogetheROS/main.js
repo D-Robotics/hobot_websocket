@@ -416,7 +416,7 @@ function transformData(buffer) {
                   floatdata.push(bgr_putpalette[(index >= 80? (index % 80) + 1: index) * 3], 
                                  bgr_putpalette[(index >= 80? (index % 80) + 1: index) * 3 + 1], 
                                  bgr_putpalette[(index >= 80? (index % 80) + 1: index) * 3 + 2], 
-                                 155)
+                                 (index >= 1? 155 : 0))
                 })
               })
               obj.segmentation.push({

@@ -484,8 +484,8 @@ int Websocket::FrameAddSmart(
         for (int i = 0; i < height; i++) {
           auto arrays = float_matrixs->add_arrays_();
           for (int j = 0; j < width; j++) {
-            index = index + 1;
             arrays->add_value_(smart_captures.features[index]);
+            index = index + 1;
           }
         }
       }

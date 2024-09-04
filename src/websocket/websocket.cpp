@@ -421,7 +421,7 @@ int Websocket::FrameAddSmart(
       point2->set_x_(smart_roi.rect.x_offset + smart_roi.rect.width);
       point2->set_y_(smart_roi.rect.y_offset + smart_roi.rect.height);
       // point2->set_score_(1.0);
-      // proto_box->set_score(1.0);
+      proto_box->set_score(smart_roi.confidence);
     }
 
     // attributes
@@ -477,6 +477,7 @@ int Websocket::FrameAddSmart(
     for (auto smart_captures : smart_target.captures) {
       int width = smart_captures.img.width;
       int height = smart_captures.img.height;
+      int step = smart_captures.img.step;
       if (smart_target.type == "parking_space") {
         auto float_matrixs = target->add_float_matrixs_();
         float_matrixs->set_type_("segmentation");
@@ -486,6 +487,53 @@ int Websocket::FrameAddSmart(
           for (int j = 0; j < width; j++) {
             arrays->add_value_(smart_captures.features[index]);
             index = index + 1;
+          }
+        }
+      }
+      else if (smart_target.type == "optical_flow") {
+        auto float_matrixs = target->add_float_matrixs_();
+        float_matrixs->set_type_("opticalFlow");
+        
+        int stride = width * height;
+        size_t x_offset = 0;
+        size_t y_offset = static_cast<size_t>(stride);
+        std::vector<float> flow_x;
+        flow_x.reserve(stride);
+        std::vector<float> flow_y;
+        flow_y.reserve(stride);
+        for (int i = 0; i < stride; ++i) {
+          flow_x.emplace_back(smart_captures.features[x_offset++] * step);
+          flow_y.emplace_back(smart_captures.features[y_offset++] * step);
+        }
+        cv::Mat magnitude, angle;
+        cv::cartToPolar(flow_x, flow_y, magnitude, angle);
+        float *magnitude_data = reinterpret_cast<float *>(magnitude.data);
+        float *angle_data = reinterpret_cast<float *>(angle.data);
+        for (int i = 0; i < stride; ++i) {
+          magnitude_data[i] =
+              std::isnan(magnitude_data[i]) ? 0.0f : magnitude_data[i];
+        }
+        cv::normalize(magnitude, magnitude, 0, 255, cv::NORM_MINMAX);
+        cv::Mat flow_img(height, width, CV_8UC3);
+        int id = 0;
+        for (int h = 0; h < height; ++h) {
+          for (int w = 0; w < width; ++w) {
+            flow_img.at<cv::Vec3b>(h, w)[0] = angle_data[id] * 180.0 / 3.14159265 / 2.0;
+            flow_img.at<cv::Vec3b>(h, w)[1] = magnitude_data[id];
+            flow_img.at<cv::Vec3b>(h, w)[2] = 255;
+            ++id;
+          }
+        }
+        cv::cvtColor(flow_img, flow_img, cv::COLOR_HSV2BGR);
+        uint8_t *data = flow_img.data;
+        int index = 0;
+        for (int i = 0; i < height; i++) {
+          auto arrays = float_matrixs->add_arrays_();
+          for (int j = 0; j < width; j++) {
+            for (int k = 0; k < 3; ++k) {
+              arrays->add_value_(static_cast<float>(data[index]));
+              ++index;
+            }
           }
         }
       }

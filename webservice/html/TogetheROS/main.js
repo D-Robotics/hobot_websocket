@@ -425,7 +425,29 @@ function transformData(buffer) {
                 h: item['floatMatrixs_'][0]['arrays_'].length,
                 data: floatdata
               })
-            } else { // 抠图分割
+            } 
+            else if (floatType === 'opticalFlow' && messageShowSelect.floatMatrixs) {
+              let floatdata = []
+              item['floatMatrixs_'][0]['arrays_'].map(values => {
+                let size = values['value_'].length;
+                for (let i = 0; i < size; ) {
+                  floatdata.push(values['value_'][i],
+                                 values['value_'][i + 1],
+                                 values['value_'][i + 2],
+                                 200);
+                  i += 3;
+                }
+              });
+              let flow_w = item['floatMatrixs_'][0]['arrays_'][0]['value_'].length / 3;
+              let flow_h = item['floatMatrixs_'][0]['arrays_'].length;
+              obj.segmentation.push({
+                type: 'full_img',
+                w: flow_w,
+                h: flow_h,
+                data: floatdata
+              })
+            } 
+            else { // 抠图分割
               if (messageShowSelect.floatMatrixsMatting && labelBodyBox && FullFloatMatrix) {
                 let labelWidth = labelBodyBox.box2.x - labelBodyBox.box1.x;
                 let labelHeight = labelBodyBox.box2.y - labelBodyBox.box1.y;

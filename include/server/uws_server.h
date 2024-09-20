@@ -22,6 +22,8 @@
 
 namespace websocket {
 
+using MsgCallBackType = std::function<void(char *message, size_t length)>;
+
 class UwsServer {
  public:
   explicit UwsServer(const std::string &config);
@@ -29,12 +31,12 @@ class UwsServer {
   ~UwsServer() = default;
 
  public:
-  int Init();
+  int Init(int port, MsgCallBackType cb = nullptr);
   int Send(const std::string &protocol);
   int DeInit();
 
  private:
-  void StartServer();
+  void StartServer(int port, MsgCallBackType cb);
   std::mutex mutex_;
   uWS::WebSocket<uWS::SERVER> *connetion_;
   std::shared_ptr<std::thread> worker_;

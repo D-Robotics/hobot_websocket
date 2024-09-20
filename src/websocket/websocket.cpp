@@ -41,8 +41,13 @@ std::map<int, std::string> gesture_map{{0, ""},
 
 Websocket::Websocket(rclcpp::Node::SharedPtr &nh) : nh_(nh) {
   uws_server_ = std::make_shared<UwsServer>();
-  if (uws_server_->Init()) {
+  if (uws_server_->Init(port_defalt_)) {
     throw std::runtime_error("Websocket Init uWS server failed");
+  }
+  uws_server_interaction_ = std::make_shared<UwsServer>();
+  if (uws_server_interaction_->Init(port_interaction_,
+    std::bind(&Websocket::OnWSMessage, this, std::placeholders::_1, std::placeholders::_2))) {
+    throw std::runtime_error("Websocket Init uWS interaction server failed");
   }
 
   if (!worker_) {
@@ -81,13 +86,16 @@ Websocket::Websocket(rclcpp::Node::SharedPtr &nh) : nh_(nh) {
   nh_->get_parameter<bool>("only_show_image", only_show_image_);
   nh_->get_parameter<int>("output_fps", output_fps_);
 
+  ros_publisher_topic_ = nh_->declare_parameter("ros_publisher_topic", ros_publisher_topic_);
+
   if (only_show_image_) {
     RCLCPP_WARN_STREAM(nh_->get_logger(),
                        "\nParameter:"
                            << "\n image_topic: " << image_topic_name_
                            << "\n image_type: " << image_type_
                            << "\n only_show_image: " << only_show_image_
-                           << "\n output_fps: " << output_fps_);
+                           << "\n output_fps: " << output_fps_
+                           << "\n ros_publisher_topic: " << ros_publisher_topic_);
   } else {
     RCLCPP_WARN_STREAM(nh_->get_logger(),
                        "\nParameter:"
@@ -95,7 +103,8 @@ Websocket::Websocket(rclcpp::Node::SharedPtr &nh) : nh_(nh) {
                            << "\n image_type: " << image_type_
                            << "\n only_show_image: " << only_show_image_
                            << "\n smart_topic: " << smart_topic_name_
-                           << "\n output_fps: " << output_fps_);
+                           << "\n output_fps: " << output_fps_
+                           << "\n ros_publisher_topic: " << ros_publisher_topic_);
   }
 
   sp_img_info_ = std::make_shared<ImgInfo>();
@@ -131,6 +140,9 @@ Websocket::Websocket(rclcpp::Node::SharedPtr &nh) : nh_(nh) {
   get_timer = nh_->create_wall_timer(
       std::chrono::milliseconds(static_cast<int64_t>(5000)),
       std::bind(&Websocket::on_get_timer, this));
+
+  ros_publisher_compressed_ = nh_->create_publisher<sensor_msgs::msg::CompressedImage>(
+      ros_publisher_topic_, 10);
 }
 
 Websocket::~Websocket() {
@@ -165,6 +177,7 @@ Websocket::~Websocket() {
   }
 
   uws_server_->DeInit();
+  uws_server_interaction_->DeInit();
 }
 
 void Websocket::on_get_timer() {
@@ -643,9 +656,14 @@ int Websocket::SendImageSmartMessage(
   }
 
   x3::FrameMessage msg_send;
+  FrameAddSmart(msg_send, smart_msg);
+  if (uws_server_interaction_) {
+    std::string proto_send;
+    msg_send.smart_msg_().SerializeToString(&proto_send);
+    uws_server_interaction_->Send(proto_send);
+  }
   FrameAddSystemInfo(msg_send);
   FrameAddImage(msg_send, frame_msg);
-  FrameAddSmart(msg_send, smart_msg);
   std::string proto_send;
   msg_send.SerializeToString(&proto_send);
   uws_server_->Send(proto_send);
@@ -737,5 +755,39 @@ void Websocket::MessageProcess() {
     }
   }
 }
+
+void Websocket::OnWSMessage(char *message, size_t length) {
+  if (!message || !ros_publisher_compressed_) return;
+  // proto转ros2消息
+
+  RCLCPP_INFO(nh_->get_logger(), "receive protobuf message");
+
+  x3::Capture cap;
+  if (!cap.ParseFromString(std::string(message, length))) {
+    RCLCPP_ERROR(nh_->get_logger(), "parse protobuf failed");
+    return;
+  }
+  RCLCPP_DEBUG(nh_->get_logger(), "receive protobuf message timestamp: %ld, img w:%d, img h %d",
+    cap.timestamp_(), cap.img_().width_(), cap.img_().height_());
+  // TODO for debug
+  if (0)
+  {
+    std::string file_name = "./ws_" + std::to_string(cap.timestamp_()) + ".jpg";
+    std::ofstream ofs(file_name, std::ios::binary);
+    ofs << cap.img_().buf_();
+  }
+
+  sensor_msgs::msg::CompressedImage::UniquePtr msg(new sensor_msgs::msg::CompressedImage());
+  // TODO 这种计算方式可能会存在精度损失，导致时间戳匹配失败
+  msg->header.stamp.sec = cap.timestamp_() / 1e9;
+  msg->header.stamp.nanosec = cap.timestamp_() - msg->header.stamp.sec * 1e9;
+  msg->header.frame_id = "default_cam";
+  msg->format = "jpeg";
+  msg->data.resize(cap.img_().buf_().size());
+  memcpy(&msg->data[0], cap.img_().buf_().data(), cap.img_().buf_().size());
+  ros_publisher_compressed_->publish(std::move(msg));
+  RCLCPP_INFO(nh_->get_logger(), "publish ros2 message with topic %s", ros_publisher_topic_.data());
+}
+
 
 }  // namespace websocket

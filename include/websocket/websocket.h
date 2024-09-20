@@ -67,6 +67,9 @@ class Websocket {
       image_hbmem_sub_;
 
   std::shared_ptr<UwsServer> uws_server_;
+  std::shared_ptr<UwsServer> uws_server_interaction_ = nullptr;
+  int port_defalt_ = 8080;
+  int port_interaction_ = 8081;
   std::shared_ptr<std::thread> worker_;
   std::mutex map_smart_mutex_;
   bool map_stop_ = false;
@@ -118,6 +121,11 @@ class Websocket {
       sensor_msgs::msg::CompressedImage::SharedPtr frame_msg);
 
   void MessageProcess(void);
+
+  void OnWSMessage(char *message, size_t length);
+  std::string ros_publisher_topic_ = "/image";
+  rclcpp::Publisher<sensor_msgs::msg::CompressedImage>::SharedPtr ros_publisher_compressed_ =
+      nullptr;
 
   // 通过websocket协议对外输出数据的帧率控制，用于支持在wifi弱网络情况下web端流畅展示
   // 默认不做帧率控制

@@ -40,28 +40,6 @@ std::map<int, std::string> gesture_map{{0, ""},
                                        {17, "PinchClockwise"}};
 
 Websocket::Websocket(rclcpp::Node::SharedPtr &nh) : nh_(nh) {
-  uws_server_ = std::make_shared<UwsServer>();
-  if (uws_server_->Init(port_defalt_)) {
-    throw std::runtime_error("Websocket Init uWS server failed");
-  }
-  uws_server_interaction_ = std::make_shared<UwsServer>();
-  if (uws_server_interaction_->Init(port_interaction_,
-    std::bind(&Websocket::OnWSMessage, this, std::placeholders::_1, std::placeholders::_2))) {
-    throw std::runtime_error("Websocket Init uWS interaction server failed");
-  }
-
-  if (!worker_) {
-    worker_ = std::make_shared<std::thread>(
-        std::bind(&Websocket::MessageProcess, this));
-  }
-
-  data_send_thread_.CreatThread(1);
-
-  smart_stop_flag_ = false;
-  video_stop_flag_ = false;
-
-  // output_file_.open("./out.yuv", std::ios::out | std::ios::binary);
-
   rcl_interfaces::msg::ParameterDescriptor image_topic_descriptor;
   image_topic_descriptor.description = "image topic name";
   rcl_interfaces::msg::ParameterDescriptor image_type_descriptor;
@@ -87,6 +65,7 @@ Websocket::Websocket(rclcpp::Node::SharedPtr &nh) : nh_(nh) {
   nh_->get_parameter<int>("output_fps", output_fps_);
 
   ros_publisher_topic_ = nh_->declare_parameter("ros_publisher_topic", ros_publisher_topic_);
+  port_interaction_ = nh_->declare_parameter("port_interaction", port_interaction_);
 
   if (only_show_image_) {
     RCLCPP_WARN_STREAM(nh_->get_logger(),
@@ -95,7 +74,9 @@ Websocket::Websocket(rclcpp::Node::SharedPtr &nh) : nh_(nh) {
                            << "\n image_type: " << image_type_
                            << "\n only_show_image: " << only_show_image_
                            << "\n output_fps: " << output_fps_
-                           << "\n ros_publisher_topic: " << ros_publisher_topic_);
+                           << "\n ros_publisher_topic: " << ros_publisher_topic_
+                           << "\n port_interaction: " << port_interaction_
+                           );
   } else {
     RCLCPP_WARN_STREAM(nh_->get_logger(),
                        "\nParameter:"
@@ -104,8 +85,30 @@ Websocket::Websocket(rclcpp::Node::SharedPtr &nh) : nh_(nh) {
                            << "\n only_show_image: " << only_show_image_
                            << "\n smart_topic: " << smart_topic_name_
                            << "\n output_fps: " << output_fps_
-                           << "\n ros_publisher_topic: " << ros_publisher_topic_);
+                           << "\n ros_publisher_topic: " << ros_publisher_topic_
+                           << "\n port_interaction: " << port_interaction_
+                           );
   }
+
+  uws_server_ = std::make_shared<UwsServer>();
+  if (uws_server_->Init(port_defalt_)) {
+    throw std::runtime_error("Websocket Init uWS server failed");
+  }
+  uws_server_interaction_ = std::make_shared<UwsServer>();
+  if (uws_server_interaction_->Init(port_interaction_,
+    std::bind(&Websocket::OnWSMessage, this, std::placeholders::_1, std::placeholders::_2))) {
+    throw std::runtime_error("Websocket Init uWS interaction server failed");
+  }
+
+  if (!worker_) {
+    worker_ = std::make_shared<std::thread>(
+        std::bind(&Websocket::MessageProcess, this));
+  }
+
+  data_send_thread_.CreatThread(1);
+
+  smart_stop_flag_ = false;
+  video_stop_flag_ = false;
 
   sp_img_info_ = std::make_shared<ImgInfo>();
   sp_img_info_->is_updated = false;

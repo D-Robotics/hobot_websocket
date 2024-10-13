@@ -781,9 +781,8 @@ void Websocket::OnWSMessage(char *message, size_t length) {
   }
 
   sensor_msgs::msg::CompressedImage::UniquePtr msg(new sensor_msgs::msg::CompressedImage());
-  // TODO 这种计算方式可能会存在精度损失，导致时间戳匹配失败
-  msg->header.stamp.sec = cap.timestamp_() / 1e9;
-  msg->header.stamp.nanosec = cap.timestamp_() - msg->header.stamp.sec * 1e9;
+  msg->header.stamp.sec = cap.timestamp_() / 1000000000;
+  msg->header.stamp.nanosec = cap.timestamp_() - msg->header.stamp.sec * 1000000000;
   msg->header.frame_id = "default_cam";
   msg->format = "jpeg";
   msg->data.resize(cap.img_().buf_().size());

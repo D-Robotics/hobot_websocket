@@ -465,11 +465,17 @@ int Websocket::FrameAddSmart(
       }
 
       proto_points->set_type_(pt_type);
+      int i = 0;
       for (auto smart_point : smart_points.point) {
         auto point = proto_points->add_points_();
         point->set_x_(smart_point.x);
         point->set_y_(smart_point.y);
-        point->set_score_(1.0);
+        if(smart_points.type == "body_kps"){
+          point->set_score_(smart_points.confidence[i]);
+        } else {
+          point->set_score_(1.0);
+        }
+        i++;
       }
     }
 

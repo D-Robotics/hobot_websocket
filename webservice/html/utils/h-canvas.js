@@ -556,62 +556,88 @@ HCanvas.prototype.drawOuntline = function (points) {
   this.drawLine();
 };
 
+HCanvas.prototype.drawProgressBar = function (points) {
+  var point1 = { x: 100, y: this.canvas.height - 50 };
+  var point2 = { x: this.canvas.width - 100, y: this.canvas.height - 50 };
+  var point3 = { x: 100 + (points['8'].x / this.canvas.width) * (this.canvas.width - 200), y: this.canvas.height - 50 };
+  var backgroundColor = '#FDF5E6';
+  var strokeColor = '#FF8247';
+  this.drawLine(point1, point2, {
+    strokeColor: backgroundColor,
+    lineWidth: 10
+  });
+  this.drawLine(point1, point3, {
+    strokeColor: strokeColor,
+    lineWidth: 8
+  });
+}
+
+HCanvas.prototype.drawScore = function (socre, max_num) {
+  var point1 = { x: this.canvas.width - 50, y: 50 };
+  var point2 = { x: this.canvas.width - 50, y: this.canvas.height - 50 };
+  var y_val = (this.canvas.height - 50) - ((this.canvas.height - 100) * socre / max_num);
+  if (y_val < 50){
+    y_val =50;
+  }
+  var point3 = { x: this.canvas.width - 50, y: y_val };
+  var backgroundColor = '#FDF5E6';
+  var strokeColor = '#FF4500';
+  this.drawLine(point1, point2, {
+    strokeColor: backgroundColor,
+    lineWidth: 10
+  });
+  this.drawLine(point2, point3, {
+    strokeColor: strokeColor,
+    lineWidth: 8
+  });
+  //数字渲染
+  // var context = this.context;
+  // var fontstring = 40 + 'px Arial';
+  // context.beginPath();
+  // context.font = fontstring;
+  // context.textAlign = 'center';
+  // context.fillStyle = 'rgba(255, 255, 255, .8)';
+
+  // // var text = '';
+  let val = socre * 100 / max_num;
+  // var text = (Math.floor(val)).toString() + "%";
+  // context.fillText(text, this.canvas.width / 2, this.canvas.height / 2);
+  // context.closePath();
+  // context.stroke();
+  //图片渲染
+
+
+  if (val === 100){
+    let img = document.createElement('img');  // 创建 <img> 元素
+    img.src = '../assets/images/good.jpg';            // 设置图片路径
+    img.alt = 'Description of Image';        // 设置图片描述
+    img.style.position = 'absolute';  // 使用绝对定位
+    img.style.width = '300px';        // 设置图片宽度
+    img.style.height = '300px';        // 高度自动，保持比例
+    
+    // 计算图片的位置，使其居中
+    let windowWidth = window.innerWidth;  // 获取浏览器窗口的宽度
+    let windowHeight = window.innerHeight; // 获取浏览器窗口的高度
+    
+    let imgWidth = 300;  // 图片的宽度
+    let imgHeight = 300;
+  
+    // 设置图片居中位置
+    img.style.left = `${(windowWidth - imgWidth) / 2}px`;   // 水平居中
+    img.style.top = `${(windowHeight - imgHeight) / 2}px`;  // 垂直居中
+    document.body.appendChild(img);  
+    setTimeout(() => {
+      img.remove();  // 2秒后移除图片
+    }, 2000);  // 2000 毫秒即为 2 秒
+  }
+
+
+}
+
 HCanvas.prototype.drawSkeleton = function (points) {
   // 连接眼鼻
   if (!points['leftEye']) return
-  var minScore = 0.3;
-  if (
-    points['leftEye'] &&
-    points['rightEye'] &&
-    points['leftEye'].score > minScore &&
-    points['rightEye'].score > minScore
-  ) {
-    this.drawLine(points['leftEye'], points['rightEye'], {
-      lineWidth: 2
-    });
-  }
-  if (
-    points['rightEye'] &&
-    points['nose'] &&
-    points['rightEye'].score > minScore &&
-    points['nose'].score > minScore
-  ) {
-    this.drawLine(points['rightEye'], points['nose'], {
-      lineWidth: 2
-    });
-  }
-  if (
-    points['nose'] &&
-    points['leftEye'] &&
-    points['nose'].score > minScore &&
-    points['leftEye'].score > minScore
-  ) {
-    this.drawLine(points['nose'], points['leftEye'], {
-      lineWidth: 2
-    });
-  }
-
-  // 连接耳目
-  if (
-    points['leftEye'] &&
-    points['leftEar'] &&
-    points['leftEye'].score > minScore &&
-    points['leftEar'].score > minScore
-  ) {
-    this.drawLine(points['leftEye'], points['leftEar'], {
-      lineWidth: 2
-    });
-  }
-  if (
-    points['rightEye'] &&
-    points['rightEar'] &&
-    points['rightEye'].score > minScore &&
-    points['rightEar'].score > minScore
-  ) {
-    this.drawLine(points['rightEye'], points['rightEar'], {
-      lineWidth: 2
-    });
-  }
+  var minScore = 0.8;
 
   var self = this;
   ['leftEye', 'rightEye', 'nose', 'leftEar', 'rightEar'].forEach(function (
@@ -626,147 +652,6 @@ HCanvas.prototype.drawSkeleton = function (points) {
     }
   });
 
-  // 连接耳肩
-  if (
-    points['leftEar'] &&
-    points['leftShoulder'] &&
-    points['leftEar'].score > minScore &&
-    points['leftShoulder'].score > minScore
-  ) {
-    this.drawLine(points['leftEar'], points['leftShoulder'], {
-      lineWidth: 2
-    });
-  }
-  if (
-    points['rightEar'] &&
-    points['rightShoulder'] &&
-    points['rightEar'].score > minScore &&
-    points['rightShoulder'].score > minScore
-  ) {
-    this.drawLine(points['rightEar'], points['rightShoulder'], {
-      strokeColor: '#F8E71C',
-      lineWidth: 2
-    });
-  }
-
-  // 连接躯干
-  if (
-    points['leftShoulder'] &&
-    points['rightShoulder'] &&
-    points['leftShoulder'].score > minScore &&
-    points['rightShoulder'].score > minScore
-  ) {
-    this.drawLine(points['leftShoulder'], points['rightShoulder']);
-  }
-  if (
-    points['rightShoulder'] &&
-    points['rightHip'] &&
-    points['rightShoulder'].score > minScore &&
-    points['rightHip'].score > minScore
-  ) {
-    this.drawLine(points['rightShoulder'], points['rightHip']);
-  }
-  if (
-    points['rightHip'] &&
-    points['leftHip'] &&
-    points['rightHip'].score > minScore &&
-    points['leftHip'].score > minScore
-  ) {
-    this.drawLine(points['rightHip'], points['leftHip']);
-  }
-  if (
-    points['leftHip'] &&
-    points['leftShoulder'] &&
-    points['leftHip'].score > minScore &&
-    points['leftShoulder'].score > minScore
-  ) {
-    this.drawLine(points['leftHip'], points['leftShoulder']);
-  }
-
-  // 连接上肢
-  if (
-    points['leftShoulder'] &&
-    points['leftElbow'] &&
-    points['leftShoulder'].score > minScore &&
-    points['leftElbow'].score > minScore
-  ) {
-    this.drawLine(points['leftShoulder'], points['leftElbow'], {
-      strokeColor: '#06F'
-    });
-  }
-  if (
-    points['leftElbow'] &&
-    points['leftWrist'] &&
-    points['leftElbow'].score > minScore &&
-    points['leftWrist'].score > minScore
-  ) {
-    this.drawLine(points['leftElbow'], points['leftWrist'], {
-      strokeColor: '#0CB'
-    });
-  }
-  if (
-    points['leftEye'] &&
-    points['rightElbow'] &&
-    points['leftEye'].score > minScore &&
-    points['rightElbow'].score > minScore
-  ) {
-    this.drawLine(points['rightShoulder'], points['rightElbow'], {
-      strokeColor: '#F5222D'
-    });
-  }
-  if (
-    points['rightElbow'] &&
-    points['rightWrist'] &&
-    points['rightElbow'].score > minScore &&
-    points['rightWrist'].score > minScore
-  ) {
-    this.drawLine(points['rightElbow'], points['rightWrist'], {
-      strokeColor: '#F5A623'
-    });
-  }
-
-  // 连接下肢
-  if (
-    points['leftHip'] &&
-    points['leftKnee'] &&
-    points['leftHip'].score > minScore &&
-    points['leftKnee'].score > minScore
-  ) {
-    this.drawLine(points['leftHip'], points['leftKnee'], {
-      strokeColor: '#06F'
-    });
-  }
-  if (
-    points['leftKnee'] &&
-    points['leftAnkle'] &&
-    points['leftKnee'].score > minScore &&
-    points['leftAnkle'].score > minScore
-  ) {
-    this.drawLine(points['leftKnee'], points['leftAnkle'], {
-      strokeColor: '#0CB'
-    });
-  }
-  if (
-    points['rightHip'] &&
-    points['rightKnee'] &&
-    points['rightHip'].score > minScore &&
-    points['rightKnee'].score > minScore
-  ) {
-    this.drawLine(points['rightHip'], points['rightKnee'], {
-      strokeColor: '#F5222D'
-    });
-  }
-  if (
-    points['rightKnee'] &&
-    points['rightAnkle'] &&
-    points['rightKnee'].score > minScore &&
-    points['rightAnkle'].score > minScore
-  ) {
-    this.drawLine(points['rightKnee'], points['rightAnkle'], {
-      strokeColor: '#F5A623'
-    });
-  }
-
   var self = this;
   Object.keys(points).forEach(function (item) {
     if (['leftEye', 'rightEye', 'nose', 'leftEar', 'rightEar'].includes(item)) {
@@ -775,7 +660,7 @@ HCanvas.prototype.drawSkeleton = function (points) {
 
     var point = points[item];
     if (point && point.score > minScore) {
-      self.drawPoint(point.x, point.y, 5);
+      self.drawPoint(point.x, point.y, 2);
     }
   });
 };

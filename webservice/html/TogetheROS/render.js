@@ -6,6 +6,8 @@ function RenderFrame(canvasObj, canvasOjb2, info1, info2, videoId, performance) 
   this.performance = document.getElementById(performance);
   this.smartCanvas1 = new HCanvas(canvasObj);
   this.smartCanvas2 = new HCanvas(canvasOjb2);
+  this.pinchRotateClockwiseNum = 0;
+  this.maxNum = 300;
 }
 
 /**
@@ -64,6 +66,7 @@ RenderFrame.prototype.renderFrameStart = function ({ smartMsgData }) { // frame
   this.smartCanvas2.clear();
   let htmls1 = '';
   let htmls2 = '';
+  let has_PinchRotateClockwise = false;
   if (smartMsgData.length) {
     smartMsgData.map(item => {
       if (item) {
@@ -71,6 +74,33 @@ RenderFrame.prototype.renderFrameStart = function ({ smartMsgData }) { // frame
           this.renderFrameBoxes(item.boxes, item.fall.fallShow);
           if (item.attributes && item.attributes.box) {
             htmls1 += this.renderAttributes(item.attributes, item.id);
+            if (item.points.length){
+              this.renderProgressBar(item.attributes, item.points);
+              //动态画圈手势计数
+              // this.renderScore(this.pinchRotateClockwiseNum);
+              if (item.attributes.attributes.length) {
+                item.attributes.attributes.map(val => {
+                  if(val.type === 'gesture'){
+                    if(val.value === 'PinchClockwise'){
+                      if(this.pinchRotateClockwiseNum < this.maxNum){
+                        this.pinchRotateClockwiseNum = this.pinchRotateClockwiseNum + 1;
+                      } else {
+                        this.pinchRotateClockwiseNum = 0;
+                      }
+                      this.renderScore(this.pinchRotateClockwiseNum);
+                      // has_PinchRotateClockwise = true;
+                    }
+                    if(val.value === 'PinchAntiClockwise'){
+                      if(this.pinchRotateClockwiseNum > 0){
+                        this.pinchRotateClockwiseNum = this.pinchRotateClockwiseNum - 1;
+                      }
+                      this.renderScore(this.pinchRotateClockwiseNum);
+                      // has_PinchRotateClockwise = true;
+                    }
+                  }
+                })
+              }
+            }
           }
         }
         if (item.fall.fallShow) {
@@ -84,10 +114,35 @@ RenderFrame.prototype.renderFrameStart = function ({ smartMsgData }) { // frame
         }
       }
     })
+    // if(has_PinchRotateClockwise === false){
+    //   this.pinchRotateClockwiseNum = 0;
+    // }
   }
   this.info1.innerHTML = htmls1;
   this.info2.innerHTML = htmls2;
   // console.timeEnd('渲染计时器')
+}
+
+// 渲染进度条
+RenderFrame.prototype.renderProgressBar = function (attributes, points){
+  if (attributes.attributes.length) {
+    attributes.attributes.map(val => {
+      if(val.type === 'gesture'){
+        if(val.value === 'PinchMove'){
+          points.map(item => {
+            if(item.type === 'hand_landmarks'){
+              this.smartCanvas1.drawProgressBar(item.skeletonPoints);
+            }
+          })
+        }
+      }
+    })
+  }
+}
+
+// 渲染分数
+RenderFrame.prototype.renderScore = function (socre){
+  this.smartCanvas1.drawScore(socre, this.maxNum);
 }
 
 // 渲染轮廓框
@@ -142,6 +197,7 @@ RenderFrame.prototype.createTemplateAttributesHtml = function (attributes, id, c
     });
   }
   html += '</ol></li>'
+
   return html;
 }
 

@@ -38,6 +38,7 @@ find_package(rclcpp REQUIRED)
 find_package(sensor_msgs REQUIRED)
 find_package(ai_msgs REQUIRED)
 find_package(hbm_img_msgs REQUIRED)
+find_package(OpenCV 4 REQUIRED)
 
 include_directories(
   include
@@ -45,8 +46,6 @@ include_directories(
   include/protobuf
   include/utils
 )
-
-set(OPENCV_LIB opencv_world)
 
 if (${CMAKE_SYSTEM_PROCESSOR} STREQUAL "aarch64")
   include_directories(
@@ -95,6 +94,7 @@ ament_target_dependencies(websocket
   sensor_msgs 
   ai_msgs 
   hbm_img_msgs
+  OpenCV
 )
 
 # Link libraries
@@ -104,7 +104,6 @@ target_link_libraries(websocket
   crypto 
   z 
   libprotobuf.a
-  ${OPENCV_LIB}
 )
 
 # Install target

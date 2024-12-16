@@ -32,6 +32,9 @@ class UwsServer {
   int Init();
   int Send(const std::string &protocol);
   int DeInit();
+  void SetChannel(int ch) {
+    channel_ = ch;
+  }
 
  private:
   void StartServer();
@@ -40,6 +43,7 @@ class UwsServer {
   std::shared_ptr<std::thread> worker_;
  private:
   std::string config_file_;
+  int channel_;
 };
 }  // namespace websocket
 

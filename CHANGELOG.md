@@ -1,4 +1,8 @@
 # Changelog for package websocket
+tros_2.3.2 (2024-12-16)
+------------------
+1. web增加分屏显示，支持多路websocket请求。
+
 
 tros_2.3.1 (2024-11-15)
 ------------------

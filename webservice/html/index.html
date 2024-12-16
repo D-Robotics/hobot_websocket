@@ -20,10 +20,49 @@
 
     <section>
       <ul class="cont-url">
-        <li><a href="./TogetheROS/">Web Display</a></li>
+        <li>
+          <select id="pathchoice" class="pathchoice" onchange="changePathNum(value)">
+            <option value="1">1路</option>
+            <option value="2">2路</option>
+            <option value="3">3路</option>
+            <option value="4">4路</option>
+            <option value="5">5路</option>
+            <option value="6">6路</option>
+            <option value="7">7路</option>
+            <option value="8">8路</option>
+          </select>
+        </li>
+        <li><a href="./TogetheROS/" onclick="getVideoNum()">Web Display</a></li>
       </ul>
     </section>
   </div>
+  <script>
+    changePathNum(getVideoNum())
+
+    function changePathNum(value) {
+      document.cookie = `path_num=${value}`
+    }
+
+    function getVideoNum() {
+      let num = 1
+      let obj = {}
+      const cookies = document.cookie.split('; ')
+      const inp = document.getElementById('pathchoice')
+      cookies.map(item => {
+        let arr = item.split('=')
+        obj[arr[0]] = arr[1] * 1
+      })
+      if (typeof obj.path_num !== 'undefined') {
+        num = obj.path_num
+      } else {
+        if (inp && inp.value) {
+          num = inp.value
+        }
+      }
+      inp.value = num
+      return num
+    }
+  </script>
 </body>
 
 </html>

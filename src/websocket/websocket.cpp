@@ -40,20 +40,7 @@ std::map<int, std::string> gesture_map{{0, ""},
                                        {17, "PinchClockwise"}};
 
 Websocket::Websocket(rclcpp::Node::SharedPtr &nh) : nh_(nh) {
-  uws_server_ = std::make_shared<UwsServer>();
-  if (uws_server_->Init()) {
-    throw std::runtime_error("Websocket Init uWS server failed");
-  }
 
-  if (!worker_) {
-    worker_ = std::make_shared<std::thread>(
-        std::bind(&Websocket::MessageProcess, this));
-  }
-
-  data_send_thread_.CreatThread(1);
-
-  smart_stop_flag_ = false;
-  video_stop_flag_ = false;
 
   // output_file_.open("./out.yuv", std::ios::out | std::ios::binary);
 
@@ -73,6 +60,7 @@ Websocket::Websocket(rclcpp::Node::SharedPtr &nh) : nh_(nh) {
 
   nh_->declare_parameter<bool>("only_show_image", only_show_image_);
   nh_->declare_parameter<int>("output_fps", output_fps_);
+  nh_->declare_parameter<int>("channel", channel_);
 
   nh_->get_parameter<std::string>("image_topic", image_topic_name_);
   nh_->get_parameter<std::string>("image_type", image_type_);
@@ -80,6 +68,23 @@ Websocket::Websocket(rclcpp::Node::SharedPtr &nh) : nh_(nh) {
 
   nh_->get_parameter<bool>("only_show_image", only_show_image_);
   nh_->get_parameter<int>("output_fps", output_fps_);
+  nh_->get_parameter<int>("channel", channel_);
+
+  uws_server_ = std::make_shared<UwsServer>();
+  uws_server_->SetChannel(channel_);
+  if (uws_server_->Init()) {
+    throw std::runtime_error("Websocket Init uWS server failed");
+  }
+
+  if (!worker_) {
+    worker_ = std::make_shared<std::thread>(
+        std::bind(&Websocket::MessageProcess, this));
+  }
+
+  data_send_thread_.CreatThread(1);
+
+  smart_stop_flag_ = false;
+  video_stop_flag_ = false;
 
   if (only_show_image_) {
     RCLCPP_WARN_STREAM(nh_->get_logger(),
@@ -368,7 +373,8 @@ int Websocket::FrameAddSmart(
   auto static_msg = proto_frame_message.mutable_statistics_msg_();
 
   auto fps_attrs = static_msg->add_attributes_();
-  fps_attrs->set_type_("fps");
+  std::string fps_str = "fps_" + std::to_string(channel_);
+  fps_attrs->set_type_(fps_str);
   fps_attrs->set_value_(smart_msg->fps);
   fps_attrs->set_value_string_(std::to_string(smart_msg->fps));
 
@@ -381,18 +387,22 @@ int Websocket::FrameAddSmart(
   }
   if (smart_delay > 0) {
     auto smart_delay_attrs = static_msg->add_attributes_();
-    smart_delay_attrs->set_type_("ai_delay");
+    std::string ai_delay_str = "ai_delay_" + std::to_string(channel_);
+    smart_delay_attrs->set_type_(ai_delay_str);
     smart_delay_attrs->set_value_(smart_delay);
     smart_delay_attrs->set_value_string_(std::to_string(smart_delay));
   }
-
+#if 0
   auto ts_attr = static_msg->add_attributes_();
-  ts_attr->set_type_("stamp");
+  std::string stamp_str = "stamp_" + std::to_string(channel_);
+  ts_attr->set_type_(stamp_str);
   ts_attr->set_value_(static_cast<uint64_t>(smart_msg->header.stamp.sec) *
                           1000 +
                       smart_msg->header.stamp.nanosec / 1000 / 1000);
   ts_attr->set_value_string_(std::to_string(smart_msg->header.stamp.sec) + "_" +
-                             std::to_string(smart_msg->header.stamp.nanosec));
+                            std::to_string(smart_msg->header.stamp.nanosec));
+#endif    
+
 
   auto smart = proto_frame_message.mutable_smart_msg_();
   smart->set_timestamp_(static_cast<uint64_t>(smart_msg->header.stamp.sec) *

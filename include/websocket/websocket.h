@@ -123,6 +123,7 @@ class Websocket {
   // 默认不做帧率控制
   int output_fps_ = 0;
   int send_frame_count_ = 0;
+  int channel_ = 0;
 
   struct ImgInfo
   {

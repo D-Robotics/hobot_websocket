@@ -62,7 +62,7 @@ void UwsServer::StartServer() {
     connetion_ = nullptr;
     RCLCPP_DEBUG(rclcpp::get_logger("websocket"), "UwsServer Disconnection with PC success");
   });
-  if (!hub.listen(8080)) {
+  if (!hub.listen(8080 + channel_ * 2)) {
     RCLCPP_DEBUG(rclcpp::get_logger("websocket"), "UwsServer start failed");
     return;
   }

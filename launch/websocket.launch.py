@@ -73,6 +73,10 @@ def generate_launch_description():
             default_value='/hobot_mono2d_body_detection',
             description='smart message subscribe topic name'),
         DeclareLaunchArgument(
+            'websocket_channel',
+            default_value='0',
+            description='web channel for show stream'),
+        DeclareLaunchArgument(
             'log_level',
             default_value='warn',
             description='Log level'),
@@ -86,6 +90,7 @@ def generate_launch_description():
                 {"only_show_image": LaunchConfiguration(
                     'websocket_only_show_image')},
                 {"output_fps": LaunchConfiguration('websocket_output_fps')},
+                {"channel": LaunchConfiguration('websocket_channel')},
                 {"smart_topic": LaunchConfiguration('websocket_smart_topic')}
             ],
             arguments=['--ros-args', '--log-level', LaunchConfiguration('log_level')]

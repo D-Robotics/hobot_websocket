@@ -14,7 +14,7 @@
 
 import os
 import subprocess
-
+import uuid
 from launch import LaunchDescription
 from launch.actions import DeclareLaunchArgument
 from launch_ros.actions import Node
@@ -51,6 +51,8 @@ def generate_launch_description():
     else:
         print("webserver has launch")
 
+    random_suffix = str(uuid.uuid4())[:8]
+    node_name = f"hobot_websocket_{random_suffix}"
     return LaunchDescription([
         DeclareLaunchArgument(
             'websocket_image_topic',
@@ -84,6 +86,7 @@ def generate_launch_description():
             package='websocket',
             executable='websocket',
             output='screen',
+            name=node_name,
             parameters=[
                 {"image_topic": LaunchConfiguration('websocket_image_topic')},
                 {"image_type": LaunchConfiguration('websocket_image_type')},

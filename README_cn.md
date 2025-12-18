@@ -22,19 +22,19 @@ ai_msgs为自定义消息格式，用于发布算法模推理结果，定义在h
 ### 开发环境
 
 - 编程语言: C/C++
-- 开发平台: X3/X86
-- 系统版本：Ubuntu 20.04
-- 编译工具链:Linux GCC 9.3.0/Linaro GCC 9.3.0
+- 开发平台: X3/X5/S100/S100P/S600/X86
+- 系统版本：Ubuntu 20.04/Ubuntu 22.04/Ubuntu 24.04
+- 编译工具链:Linux GCC 9.3.0/Linaro GCC 11.4.0/Linaro GCC 13.3.0
 
 ### 编译
 
- 支持在X3/X86 Ubuntu系统上编译以及在x86 Ubuntu上使用docker交叉编译x3可执行程序。
+ 支持在RDK Ubuntu系统上编译以及在x86 Ubuntu上使用docker交叉编译可执行程序。
 
-#### X3/X86 Ubuntu平台编译
+#### RDK/X86 Ubuntu平台编译
 
 1. 编译环境确认
 
-   - Ubuntu系统为Ubuntu 20.04。
+   - Ubuntu系统为Ubuntu 20.04/22.04/24.04。
    - 当前编译终端已设置TogetherROS环境变量：`source PATH/setup.bash`。其中PATH为TogetherROS的安装路径。
    - 已安装ROS2编译工具colcon，安装命令：`pip install -U colcon-common-extensions`
 
@@ -71,7 +71,7 @@ TogetherROS安装包已包含websocket包，用户可直接使用，不需要单
 
 ## 使用介绍
 
-websocket支持在X3/X86 Ubuntu 20.04系统和x3 yocto linux系统运行。
+websocket支持在RDK/X86 Ubuntu 20.04系统, x3 yocto linux系统和 x5 build root 系统运行。
 
 ### 依赖
 
@@ -131,7 +131,7 @@ ros2 launch websocket websocket_service.launch.py
 ros2 run websocket websocket --ros-args -p image_topic:=/image -p image_type:=mjpeg -p only_show_image:=true
 ~~~
 
-#### **x3 Ubuntu**
+#### **RDK Ubuntu**
 
 ##### 方式1，ros2 run运行
 
@@ -197,7 +197,7 @@ source ./install/setup.bash
 ros2 launch websocket websocket.launch.py websocket_image_topic:=/image_jpeg websocket_only_show_image:=true
 ```
 
-#### **x3 Linux**
+#### **Linux**
 
 第一次运行要启动webserver服务，运行方法为:
 

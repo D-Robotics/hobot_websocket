@@ -488,7 +488,7 @@ int Websocket::FrameAddSmart(
       int width = smart_captures.img.width;
       int height = smart_captures.img.height;
       int step = smart_captures.img.step;
-      if (smart_target.type == "parking_space") {
+      if (smart_target.type == "parking_space" || smart_target.type == "segmentation") {
         auto float_matrixs = target->add_float_matrixs_();
         float_matrixs->set_type_("segmentation");
         int index = 0;

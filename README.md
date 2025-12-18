@@ -22,15 +22,15 @@ ai_msgs is a custom message format used to publish algorithm inference results, 
 ### Development Environment
 
 - Programming Language: C/C++
-- Development Platform: X3/X86
-- System Version: Ubuntu 20.04
-- Compilation Toolchain: Linux GCC 9.3.0/Linaro GCC 9.3.0
+- Development Platform: X3/X5/S100/S100P/S600/X86
+- System Version: Ubuntu 20.04/22.04/24.04
+- Compilation Toolchain: Linux GCC 9.3.0/Linaro GCC 11.4.0/Linaro GCC 13.3.0
 
 ### Compilation
 
-Support compilation on X3/X86 Ubuntu system and cross-compilation of x3 executable on x86 Ubuntu using Docker.
+Support compilation on RDK Ubuntu system and cross-compilation of RDK executable on x86 Ubuntu using Docker.
 
-#### Compilation on X3/X86 Ubuntu Platform
+#### Compilation on RDK Ubuntu Platform
 
 1. Compilation Environment Confirmation
 
@@ -69,7 +69,7 @@ The TogetherROS installation package already includes the websocket package, whi
 
 ## User Guide
 
-websocket supports running on X3/X86 Ubuntu 20.04 systems and x3 yocto Linux systems.
+websocket supports running on RDK Ubuntu 20.04/22.04/24.04 systems, x3 yocto Linux system, and x5 buildroot system.
 
 ### Dependencies
 
@@ -129,7 +129,7 @@ Start the websocket node
 ros2 run websocket websocket --ros-args -p image_topic:=/image -p image_type:=mjpeg -p only_show_image:=true
 ~~~
 
-#### **x3 Ubuntu**
+#### **RDK Ubuntu**
 
 ##### Method 1, running with ros2 run
 
@@ -195,7 +195,7 @@ source ./install/setup.bash
 ros2 launch websocket websocket.launch.py websocket_image_topic:=/image_jpeg websocket_only_show_image:=true
 ```
 
-#### **x3 Linux**
+#### **Linux**
 
 To start the webserver service for the first time, run the following command:`cd` to the directory `install/websocket/lib/websocket/webservice`, and then start nginx
 
